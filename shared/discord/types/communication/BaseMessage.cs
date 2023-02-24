@@ -6,12 +6,6 @@ using Newtonsoft.Json;
 #pragma warning disable CS8618
 public class BaseMessage
 {
-  [JsonProperty("data")]
-  private JObject? _data { get; set; }
-  [JsonProperty("args")]
-  private JObject? _args { get; set; }
-
-
   /// <summary>
   /// The command of this message.
   /// </summary>
@@ -29,21 +23,18 @@ public class BaseMessage
   /// </summary>
   [JsonProperty("nonce")]
   public string? Nonce { get; set; }
+  
+  /// <summary>
+  /// Event data send along with the event.
+  /// (Only used when the Message is a event.)
+  /// </summary>
+  [JsonProperty("data")]
+  public JObject? Data { get; set; }
 
   /// <summary>
-  /// Contains ether arguments passed along with a command or
-  /// data passed along with a event.
+  /// Command arguments send along with the command.
+  /// (Only used when the Message is a command.)
   /// </summary>
-  [JsonIgnore]
-  public JObject Data { 
-    get {
-      return 
-        _data ?? 
-        _args ?? 
-        new JObject();
-    }
-    set {
-      _data = value;
-    }
-  }
+  [JsonProperty("args")]
+  public JObject? Arguments { get; set; }
 }

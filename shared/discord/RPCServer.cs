@@ -56,6 +56,8 @@ public class RPCServer {
 
     // handle new messages
     this.server.OnMessageFrameReceived += (frame) => {
+      Console.WriteLine($"OnMessageFrame: {frame.Message}");
+
       try {
         this.HandleNewMessage(frame);
       } catch (Exception e) {
@@ -73,6 +75,7 @@ public class RPCServer {
   private void HandleNewMessage(MessageFrame frame) {
     switch (frame.Header.Opcode) {
       case Opcode.Handshake:
+        Console.WriteLine("Handling Handshake");
         this.HandleHandshake(frame);
         break;
 
@@ -100,6 +103,7 @@ public class RPCServer {
 
   // Handles a handshake request for the current connection if it was not handled before.
   private void HandleHandshake(MessageFrame frame) {
+    Console.WriteLine(frame.Message);
     if (this.isConnected) {
       // this case should not happen
       this.log?.LogWarning("Got a handshake request on an established connection. Connection closed.");
@@ -121,17 +125,19 @@ public class RPCServer {
     {
       Command = "DISPATCH",
       Event = "READY",
-      Nonce = Guid.NewGuid().ToString(), // FIXME: there should be a better way to this.
       Data = JObject.FromObject(new ReadyMessage()
       {
         Version = 1,
-        Configuration = new Configuration(),
-        User = new User()
+        Configuration = Configuration.GetMockData(),
+        User = User.GetMockData()
       })
     };
+    string responseJson = JsonConvert.SerializeObject(response);
+    Console.WriteLine(responseJson);
+    this.log?.LogTrace(responseJson);
 
     // send response
-    this.server.Send(Opcode.Frame, JsonConvert.SerializeObject(response));
+    this.server.Send(Opcode.Frame, responseJson);
   }
 
   // handle normal message frames

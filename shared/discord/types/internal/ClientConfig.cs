@@ -1,8 +1,25 @@
-namespace RPCProxy.Shared.Discord.Types.Internal;
+using Newtonsoft.Json;
 
-public class Configuration
+namespace RPCProxy.Shared.Discord.Types.Internal
 {
-  public readonly string cdn_host = "cdn.discordapp.com";
-  public readonly string api_endpoint = "//discord.com/api";
-  public readonly string environment = "production";
+  public class Configuration
+  {
+    [JsonProperty("cdn_host")]
+    public string CdnHost { get; set; }
+
+    [JsonProperty("api_endpoint")]
+    public string ApiEndpoint { get; set; }
+
+    [JsonProperty("environment")]
+    public string Environment { get; set; }
+    
+    public static Configuration GetMockData() {
+      return new Configuration()
+      {
+        CdnHost = "cdn.discordapp.com",
+        ApiEndpoint = "//canary.discord.com/api",
+        Environment = "production"
+      };
+    }
+  }
 }

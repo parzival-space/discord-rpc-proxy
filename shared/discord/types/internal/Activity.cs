@@ -1,42 +1,81 @@
-namespace RPCProxy.Shared.Discord.Types.Internal;
 
-public class Activity
+using Newtonsoft.Json;
+
+namespace RPCProxy.Shared.Discord.Types.Internal
 {
-  public String? state { get; set; }
-  public String? details { get; set; }
-  public ActivityTimestamps? timestamps { get; set; }
-  public ActivityAssets? assets { get; set; }
-  public ActivityParty? party { get; set; }
-  public ActivitySecrets? secrets { get; set; }
-  public bool? instance { get; set; }
-}
+  public class Activity
+  {
+    [JsonProperty("state")]
+    public String? State { get; set; }
 
-public class ActivityTimestamps
-{
-  public long? start { get; set; }
-  public long? end { get; set; }
-}
+    [JsonProperty("details")]
+    public String? Details { get; set; }
 
-public class ActivityAssets
-{
-  public String? large_image { get; set; }
-  public String? large_text { get; set; }
-  public String? small_image { get; set; }
-  public String? small_text { get; set; }
-}
+    [JsonProperty("timestamps")]
+    public ActivityTimestamps? Timestamps { get; set; }
 
-public class ActivityParty
-{
-  public String? id;
-  public int[]? size;
-}
+    [JsonProperty("assets")]
+    public ActivityAssets? Assets { get; set; }
 
-public class ActivitySecrets
-{
-  public String? join;
-  public String? spectate;
+    [JsonProperty("party")]
+    public ActivityParty? Party { get; set; }
 
-  // should always be null as it has been deprecated in issue #152 
-  // on the original repo
-  public String? match; 
+    [JsonProperty("secrets")]
+    public ActivitySecrets? Secrets { get; set; }
+
+    [JsonProperty("instance")]
+    public bool? Instance { get; set; }
+  }
+
+  public class ActivityTimestamps
+  {
+
+    [JsonProperty("start")]
+    public long? Start { get; set; }
+
+    [JsonProperty("end")]
+    public long? End { get; set; }
+  }
+
+  public class ActivityAssets
+  {
+
+    [JsonProperty("large_image")]
+    public String? LargeImage { get; set; }
+
+    [JsonProperty("large_text")]
+    public String? LargeText { get; set; }
+
+    [JsonProperty("small_image")]
+    public String? SmallImage { get; set; }
+
+    [JsonProperty("small_text")]
+    public String? SmallText { get; set; }
+  }
+
+  public class ActivityParty
+  {
+
+    [JsonProperty("id")]
+    public String? ID;
+
+    [JsonProperty("size")]
+    public int[]? Size;
+  }
+
+  public class ActivitySecrets
+  {
+
+    [JsonProperty("join")]
+    public String? JoinSecret;
+
+    [JsonProperty("spectate")]
+    public String? SpectateSecret;
+
+    /// <summary>
+    /// has been deprecated in issue #152 on the original repo
+    /// </summary>
+    [JsonProperty("match")]
+    public String? MatchSecret;
+  }
 }
