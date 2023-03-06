@@ -1,4 +1,3 @@
-
 using Newtonsoft.Json;
 
 namespace RPCProxy.Shared.Discord.Types.Internal
