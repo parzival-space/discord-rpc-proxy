@@ -5,5 +5,9 @@
     "Newtonsoft",
     "Serilog",
     "TMPDIR"
-  ]
+  ],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "parzival-space",
+    "projectKey": "parzival-space_discord-rpc-proxy_AYaZhcFnt4yD4Lml2Muf"
+  }
 }

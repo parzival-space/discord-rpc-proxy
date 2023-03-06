@@ -16,7 +16,7 @@ public class ReadyMessage
   /// The configuration of the connection.
   /// </summary>
   [JsonProperty("config")]
-  public Configuration Configuration { get; set; }
+  public ClientConfig Configuration { get; set; }
 
   /// <summary>
   /// Discord User that is using the Discord Client.

@@ -2,6 +2,9 @@ namespace RPCProxy.Shared.Discord.Types.Communication;
 
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using RPCProxy.Shared.Discord.Types.Internal;
+using Newtonsoft.Json.Converters;
+using RPCProxy.Shared.Discord.Utils;
 
 #pragma warning disable CS8618
 public class BaseMessage
@@ -9,14 +12,14 @@ public class BaseMessage
   /// <summary>
   /// The command of this message.
   /// </summary>
-  [JsonProperty("cmd")]
-  public string? Command { get; set; }
+  [JsonProperty("cmd"), JsonConverter(typeof(FallbackEnumConverter<Command>))]
+  public Command Command = Command.UNKNOWN;
 
   /// <summary>
   /// The event of this message.
   /// </summary>
-  [JsonProperty("evt")]
-  public string? Event { get; set; }
+  [JsonProperty("evt"), JsonConverter(typeof(FallbackEnumConverter<Event>))]
+  public Event Event = Event.UNKNOWN;
 
   /// <summary>
   /// A incremental value to help identify payloads.

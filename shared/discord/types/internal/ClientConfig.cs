@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace RPCProxy.Shared.Discord.Types.Internal
 {
-  public class Configuration
+  public class ClientConfig
   {
     [JsonProperty("cdn_host")]
     public string CdnHost { get; set; }
@@ -13,8 +13,8 @@ namespace RPCProxy.Shared.Discord.Types.Internal
     [JsonProperty("environment")]
     public string Environment { get; set; }
     
-    public static Configuration GetMockData() {
-      return new Configuration()
+    public static ClientConfig GetMockData() {
+      return new ClientConfig()
       {
         CdnHost = "cdn.discordapp.com",
         ApiEndpoint = "//canary.discord.com/api",

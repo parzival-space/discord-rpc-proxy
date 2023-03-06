@@ -17,24 +17,27 @@ public static class Program {
   public static void Main(string[] args) {
     BasicLogger log = BasicLogger.Create(typeof(Program).Name);
 
-    IPCServer server = new IPCServer("discord-ipc-0", BasicLogger.Create<IPCServer>());
-    SingleComClient client = new SingleComClient(System.Net.IPAddress.Parse("192.168.0.29"), 6969, logger: BasicLogger.Create<SingleComClient>());
+    RPCServer server = new RPCServer("discord-ipc-0", BasicLogger.Create<IPCServer>());
 
-    client.OnDataFrameReceived += (frame) =>
-    {
-      DataPackage? package = JsonConvert.DeserializeObject<DataPackage>(frame.Message);
-      if (package == null) return;
-
-      server.Send(package.opcode, package.message);
+    server.OnActivityUpdate += (activity) => {
+      log.LogInformation(
+        "New Activity:\n" +
+        JsonConvert.SerializeObject(activity, Formatting.Indented)
+      );
     };
 
-    server.OnMessageFrameReceived += (frame) =>
+    server.OnAcceptedJoinRequest += (userId) =>
     {
-      client.Send(RPCProxy.Shared.Communication.Types.Opcode.Frame, JsonConvert.SerializeObject(new DataPackage() {
-        opcode = frame.Header.Opcode,
-        message = frame.Message
-      }));
+      log.LogInformation($"Game accepted join request from user: {userId}");
     };
+
+    server.OnDeclinedJoinRequest += (userId) =>
+    {
+      log.LogInformation($"Game declined join request from user: {userId}");
+    };
+
+    server
+
 
     System.Diagnostics.Process.GetCurrentProcess().WaitForExit();
   }

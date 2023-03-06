@@ -15,7 +15,10 @@ public class RPCServer {
   private readonly ILogger? log;
   private IPCServer server;
   private bool isConnected;
-  public int[] SupportedVersions = { 1 };
+  private HashSet<Event> subscribedEvents;
+  private Activity? currentActivity;
+
+  public readonly int[] SupportedVersions = { 1 };
 
 
   /// <summary>
@@ -36,6 +39,18 @@ public class RPCServer {
   public event ActivityUpdate? OnActivityUpdate;
   public delegate void ActivityUpdate(Activity activity);
 
+  /// <summary>
+  /// Event that gets fired when the client accepts a join request.
+  /// </summary>
+  public event AcceptedJoinRequest? OnAcceptedJoinRequest;
+  public delegate void AcceptedJoinRequest(string userId);
+
+  /// <summary>
+  /// Event that gets fired when the client accepts a join request.
+  /// </summary>
+  public event DeclinedJoinRequest? OnDeclinedJoinRequest;
+  public delegate void DeclinedJoinRequest(string userId);
+
 
   /// <summary>
   /// Creates a new RPCServer that looks to games like a running discord instance.
@@ -44,6 +59,8 @@ public class RPCServer {
   /// <param name="logger">A logger instance to use.</param>
   public RPCServer(string pipeName = "discord-ipc-0", ILogger? logger = null) {
     this.server = new IPCServer(pipeName, logger);
+    this.subscribedEvents = new HashSet<Event>();
+    this.currentActivity = null;
     this.isConnected = false;
     this.log = logger;
 
@@ -51,6 +68,7 @@ public class RPCServer {
     this.server.OnConnectionClosed += () =>
     {
       this.isConnected = false;
+      this.subscribedEvents.Clear();
       this.OnConnectionClosed?.Invoke();
     };
 
@@ -119,12 +137,12 @@ public class RPCServer {
     this.OnConnectionEstablished?.Invoke(request.ClientID);
     BaseMessage response = new BaseMessage()
     {
-      Command = "DISPATCH",
-      Event = "READY",
+      Command = Command.DISPATCH,
+      Event = Event.READY,
       Data = JObject.FromObject(new ReadyMessage()
       {
         Version = 1,
-        Configuration = Configuration.GetMockData(),
+        Configuration = ClientConfig.GetMockData(),
         User = User.GetMockData()
       })
     };
@@ -139,12 +157,32 @@ public class RPCServer {
 
     switch (data?.Command)
     {
-      case "SET_ACTIVITY":
-        #pragma warning disable CS8600, CS8602
-        SetActivityPayload payload = data.Data.ToObject<SetActivityPayload>();
-        #pragma warning restore CS8600, CS8602
+      case Command.SET_ACTIVITY:
+        SetActivityPayload setActivityPayload = data.Arguments!.ToObject<SetActivityPayload>() ?? new SetActivityPayload();
+        this.OnActivityUpdate?.Invoke(setActivityPayload.Activity);
+        break;
 
-        this.OnActivityUpdate?.Invoke(payload!.Activity);
+      case Command.SUBSCRIBE:
+        Event targetEvent = data.Event;
+        if (targetEvent == Event.UNKNOWN) {
+          this.log?.LogWarning($"Client tried to subscribe to a unknown event. Original payload: {frame.Message}");
+        } 
+        else if (!this.subscribedEvents.Contains(targetEvent)) {
+          this.subscribedEvents.Add(targetEvent);
+          this.log?.LogDebug($"Subscribed to following event: {targetEvent}");
+        }
+        break;
+
+      case Command.SEND_ACTIVITY_JOIN_INVITE:
+        if (!this.subscribedEvents.Contains(Event.ACTIVITY_JOIN_REQUEST)) break;
+        ActivityRequestPayload acceptPayload = data.Data!.ToObject<ActivityRequestPayload>() ?? new ActivityRequestPayload();
+        this.OnAcceptedJoinRequest?.Invoke(acceptPayload.User);
+        break;
+
+      case Command.CLOSE_ACTIVITY_REQUEST:
+        if (!this.subscribedEvents.Contains(Event.ACTIVITY_JOIN_REQUEST)) break;
+        ActivityRequestPayload declinePayload = data.Data!.ToObject<ActivityRequestPayload>() ?? new ActivityRequestPayload();
+        this.OnDeclinedJoinRequest?.Invoke(declinePayload.User);
         break;
 
       default:
@@ -152,4 +190,6 @@ public class RPCServer {
         break;
     }
   }
+
+  public Activity? GetCurrentActivity() => this.currentActivity;
 }

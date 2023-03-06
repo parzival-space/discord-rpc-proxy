@@ -43,7 +43,7 @@ public class BasicLogger : ILogger
   public bool IsEnabled(LogLevel logLevel) => logLevel > this.level;
   public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
   {
-    if (logLevel > this.level == false) return;
+    // if (logLevel > this.level == false) return;
 
 
     Console.ForegroundColor = this.LogLevelColorMap[logLevel][0];
