@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '0 12 * * 5'
+  workflow_dispatch:
+    # manual dispatch
 
 
 jobs:
