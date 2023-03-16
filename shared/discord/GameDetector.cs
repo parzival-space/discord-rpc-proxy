@@ -38,10 +38,10 @@ namespace RPCProxy.Shared.Discord
         return;
       }
 
-      this.RegisterWatchers();
+      this.registerWatchers();
     }
 
-    private List<Game> DownloadDetectableList() {
+    private List<Game> downloadDetectableList() {
       using (HttpClient client = new HttpClient())
       using (HttpRequestMessage request = new HttpRequestMessage()) {
         // configure request
@@ -63,12 +63,13 @@ namespace RPCProxy.Shared.Discord
       }
     }
 
-    private void RegisterWatchers() {
+    private void registerWatchers() {
       if (!OperatingSystem.IsWindows()) return;
 
       // watch started processes
       startWatcher = new ManagementEventWatcher(@"\\.\root\CIMV2", "SELECT * FROM __InstanceCreationEvent WITHIN .025 WHERE TargetInstance ISA 'Win32_Process'");
       stopWatcher = new ManagementEventWatcher(@"\\.\root\CIMV2", "SELECT * FROM __InstanceDeletionEvent WITHIN .025 WHERE TargetInstance ISA 'Win32_Process'");
+
 
       /// those are theoretically better because they wont "skip" process events, but require elevated privileges
       // startWatcher = new ManagementEventWatcher(@"\\.\root\CIMV2", "SELECT * FROM Win32_ProcessStartTrace");
@@ -78,7 +79,10 @@ namespace RPCProxy.Shared.Discord
       #pragma warning disable CA1416 // Compiler is annoying
       startWatcher.EventArrived += (s, e) =>
       {
-        Game? detectedGame = this.detectableList!.FirstOrDefault(g => g!.Executables.Any(ex => (((ManagementBaseObject)e.NewEvent["TargetInstance"])["Name"].ToString() ?? "").Contains(ex.Name)), null);
+        var name = ((ManagementBaseObject)e.NewEvent["TargetInstance"])["ExecutablePath"];
+        this.log?.LogInformation($"{name}");
+
+        Game? detectedGame = this.detectableList!.FirstOrDefault(g => g!.Executables.Any(ex => this.gameFilter(e.NewEvent, ex)), null);
         
         if (detectedGame != null) {
           this.log?.LogDebug($"Game {detectedGame.Name} with id {detectedGame.ID} has been started.");
@@ -87,7 +91,7 @@ namespace RPCProxy.Shared.Discord
       };
       stopWatcher.EventArrived += (s, e) =>
       {
-        Game? detectedGame = this.detectableList!.FirstOrDefault(g => g!.Executables.Any(ex => (((ManagementBaseObject)e.NewEvent["TargetInstance"])["Name"].ToString() ?? "").Contains(ex.Name)), null);
+        Game? detectedGame = this.detectableList!.FirstOrDefault(g => g!.Executables.Any(ex => this.gameFilter(e.NewEvent, ex)), null);
 
         if (detectedGame != null) {
           this.log?.LogDebug($"Game {detectedGame.Name} with id {detectedGame.ID} has been closed.");
@@ -95,6 +99,37 @@ namespace RPCProxy.Shared.Discord
         }
       };
       #pragma warning restore CA1416
+    }
+
+    private bool gameFilter(ManagementBaseObject baseObject, Executable executable) {
+      // skip darwin checks
+      // if (executable.OS != "win32") return false;
+
+      ManagementBaseObject targetInstance = (ManagementBaseObject)baseObject["TargetInstance"];
+
+      // check args
+      bool argsValid = false;
+      string argsString = (targetInstance["CommandLine"].ToString() ?? "");
+      if (executable.Arguments != null) {
+        // check args
+        argsValid = argsString.Contains(executable.Arguments);
+      } else {
+        // ignore args
+        argsValid = true;
+      }
+
+      // check path
+      bool pathValid = false;
+      string pathString = (targetInstance["ExecutablePath"].ToString() ?? "").ToLower().Replace("\\", "/");
+      if (executable.Name.StartsWith(">")) {
+        // check if it ends with x
+        pathValid = pathString.EndsWith(executable.Name.Substring(1));
+      } else {
+        // check if contains x
+        pathValid = pathString.Contains(executable.Name);
+      }
+
+      return pathValid && argsValid;
     }
 
     /// <summary>
@@ -105,7 +140,7 @@ namespace RPCProxy.Shared.Discord
 
       if (this.detectableList == null) {
         this.log?.LogInformation("Downloading list of detectable games...");
-        this.detectableList = this.DownloadDetectableList();
+        this.detectableList = this.downloadDetectableList();
       }
 
       if (this.startWatcher != null) this.startWatcher.Start();

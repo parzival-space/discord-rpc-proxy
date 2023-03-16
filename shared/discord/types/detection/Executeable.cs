@@ -11,6 +11,9 @@ namespace RPCProxy.Shared.Discord.Types.Detection
     [JsonProperty("name")]
     public string Name { get; set; }
 
+    [JsonProperty("arguments")]
+    public string Arguments { get; set; }
+
     [JsonProperty("os")]
     public string OS { get; set; }
   }
