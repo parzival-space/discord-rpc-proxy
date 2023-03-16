@@ -17,7 +17,14 @@ public static class Program
 
   public static void Main(string[] args)
   {
-    
+    BasicLogger logger = BasicLogger.Create<GameDetector>();
+
+    GameDetector detector = new GameDetector(logger);
+
+    detector.Start();
+
     Process.GetCurrentProcess().WaitForExit();
   }
+
+  
 }

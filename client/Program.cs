@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Pipes;
+using System.Net;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -19,25 +20,9 @@ namespace RPCProxy.Client
     {
       BasicLogger log = BasicLogger.Create(typeof(Program).Name);
 
-      RPCServer server = new RPCServer("discord-ipc-0", BasicLogger.Create<IPCServer>());
-
-      server.OnActivityUpdate += (activity) =>
-      {
-        log.LogInformation(
-          "New Activity:\n" +
-          JsonConvert.SerializeObject(activity, Formatting.Indented)
-        );
-      };
-
-      server.OnAcceptedJoinRequest += (userId) =>
-      {
-        log.LogInformation($"Game accepted join request from user: {userId}");
-      };
-
-      server.OnDeclinedJoinRequest += (userId) =>
-      {
-        log.LogInformation($"Game declined join request from user: {userId}");
-      };
+      // create server and tcp client
+      IPCServer server = new IPCServer("discord-ipc-0", BasicLogger.Create<IPCServer>());
+      SingleComClient client = new SingleComClient(IPAddress.Parse("192.168.122.1"), 1234, logger: BasicLogger.Create<SingleComClient>());
 
 
 
