@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 
 namespace RPCProxy.Shared.Discord.Types.Internal
 {
+#pragma warning disable CS8618
   public class ClientConfig
   {
     [JsonProperty("cdn_host")]
@@ -22,4 +23,5 @@ namespace RPCProxy.Shared.Discord.Types.Internal
       };
     }
   }
+#pragma warning restore CS8618
 }
