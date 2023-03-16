@@ -34,7 +34,7 @@ namespace RPCProxy.Shared.Discord
       this.log = log;
 
       if (!OperatingSystem.IsWindows()) {
-        this.log?.LogWarning($"This functionality is only available on Windows.");
+        this.log?.LogDebug($"This functionality is only available on Windows.");
         return;
       }
 
@@ -79,9 +79,6 @@ namespace RPCProxy.Shared.Discord
       #pragma warning disable CA1416 // Compiler is annoying
       startWatcher.EventArrived += (s, e) =>
       {
-        var name = ((ManagementBaseObject)e.NewEvent["TargetInstance"])["ExecutablePath"];
-        this.log?.LogInformation($"{name}");
-
         Game? detectedGame = this.detectableList!.FirstOrDefault(g => g!.Executables.Any(ex => this.gameFilter(e.NewEvent, ex)), null);
         
         if (detectedGame != null) {
@@ -102,8 +99,10 @@ namespace RPCProxy.Shared.Discord
     }
 
     private bool gameFilter(ManagementBaseObject baseObject, Executable executable) {
+      #pragma warning disable CA1416 // Compiler is annoying
+
       // skip darwin checks
-      // if (executable.OS != "win32") return false;
+      if (executable.OS != "win32") return false;
 
       ManagementBaseObject targetInstance = (ManagementBaseObject)baseObject["TargetInstance"];
 
@@ -130,6 +129,7 @@ namespace RPCProxy.Shared.Discord
       }
 
       return pathValid && argsValid;
+      #pragma warning restore CA1416
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ namespace RPCProxy.Shared.Discord
       if (!OperatingSystem.IsWindows()) return;
 
       if (this.detectableList == null) {
-        this.log?.LogInformation("Downloading list of detectable games...");
+        this.log?.LogDebug("Downloading list of detectable games...");
         this.detectableList = this.downloadDetectableList();
       }
 
