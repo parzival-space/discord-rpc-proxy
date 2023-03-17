@@ -217,10 +217,6 @@ namespace RPCProxy.Shared.Communication
           this.isClientAlive = true;
           return;
 
-        case Opcode.Frame:
-          this.OnDataFrameReceived?.Invoke(frame);
-          return;
-
         case Opcode.Handshake:
           // TODO: implement handshake
           return;
@@ -232,7 +228,7 @@ namespace RPCProxy.Shared.Communication
           return;
 
         default:
-          this.log?.LogWarning($"Unsupported opcode in current frame: {frame.Header.Opcode}");
+          this.OnDataFrameReceived?.Invoke(frame);
           return;
       }
     }

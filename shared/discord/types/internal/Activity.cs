@@ -4,25 +4,25 @@ namespace RPCProxy.Shared.Discord.Types.Internal
 {
   public class Activity
   {
-    [JsonProperty("state")]
+    [JsonProperty("state", NullValueHandling=NullValueHandling.Ignore)]
     public String? State { get; set; }
 
-    [JsonProperty("details")]
+    [JsonProperty("details", NullValueHandling=NullValueHandling.Ignore)]
     public String? Details { get; set; }
 
-    [JsonProperty("timestamps")]
+    [JsonProperty("timestamps", NullValueHandling=NullValueHandling.Ignore)]
     public ActivityTimestamps? Timestamps { get; set; }
 
-    [JsonProperty("assets")]
+    [JsonProperty("assets", NullValueHandling=NullValueHandling.Ignore)]
     public ActivityAssets? Assets { get; set; }
 
-    [JsonProperty("party")]
+    [JsonProperty("party", NullValueHandling=NullValueHandling.Ignore)]
     public ActivityParty? Party { get; set; }
 
-    [JsonProperty("secrets")]
+    [JsonProperty("secrets", NullValueHandling=NullValueHandling.Ignore)]
     public ActivitySecrets? Secrets { get; set; }
 
-    [JsonProperty("instance")]
+    [JsonProperty("instance", NullValueHandling=NullValueHandling.Ignore)]
     public bool? Instance { get; set; }
   }
 

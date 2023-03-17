@@ -10,7 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <!-- <RuntimeIdentifier>win-x64</RuntimeIdentifier> -->
     <!-- <RuntimeIdentifier>linux-arm64</RuntimeIdentifier> -->
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>

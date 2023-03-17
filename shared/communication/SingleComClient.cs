@@ -179,10 +179,6 @@ namespace RPCProxy.Shared.Communication
           this.log?.LogWarning("Server send heartbeat response? This is not expected.");
           return;
 
-        case Opcode.Frame:
-          this.OnDataFrameReceived?.Invoke(frame);
-          return;
-
         case Opcode.Handshake:
           // TODO: implement handshake
           return;
@@ -193,7 +189,7 @@ namespace RPCProxy.Shared.Communication
           return;
 
         default:
-          this.log?.LogTrace($"Unsupported opcode in current frame header: 0x{BitConverter.ToString(frame.Header.HeaderBytes).Replace("-", " 0x")}");
+          this.OnDataFrameReceived?.Invoke(frame);
           return;
       }
     }

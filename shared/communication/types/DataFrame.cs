@@ -41,6 +41,14 @@ namespace RPCProxy.Shared.Communication.Types
       this.VerifyFormat();
     }
 
+    public DataFrame(Opcode opcode, byte[] message, bool ignoreVerify = false) {
+      this.Header = new DataFrameHeader(opcode, (uint)message.Length);
+      this.MessageBytes = message;
+      this.Message = Encoding.UTF8.GetString(message);
+
+      if (!ignoreVerify) this.VerifyFormat();
+    }
+
     /// <summary>
     /// Parses a MessageFrame from raw bytes.
     /// </summary>
